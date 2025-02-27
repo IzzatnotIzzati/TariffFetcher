@@ -10,4 +10,4 @@
 [🚧] Calculates energy usage + ICPT + KWTBB (RE Fund) + Tax\
 [🚧] curses (urwid) TUI
 
-An ASK school project for ASK F3
+An ASK school project for ASK F3. Currently progress is being made on Experiments branch as of 27/2/2025 10:58AM UTC+8
