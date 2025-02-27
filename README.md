@@ -5,6 +5,7 @@
 ---
 
 ## Features
+
 [🚧] Automatically fetches latest tariff
 [🚧] Calculates energy usage + ICPT + KWTBB (RE Fund) + Tax
 [🚧] curses (urwid) TUI
