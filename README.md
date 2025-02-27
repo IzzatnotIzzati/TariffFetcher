@@ -8,6 +8,6 @@
 
 [🚧] Automatically fetches latest tariff\
 [🚧] Calculates energy usage + ICPT + KWTBB (RE Fund) + Tax\
-[🚧] curses (urwid) TUI\
+[🚧] curses (urwid) TUI
 
 An ASK school project for ASK F3
