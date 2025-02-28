@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup as bs
 import requests
 import json
 from functions import *
+from decimal import Decimal
 
 response = requests.get('https://www.tnb.com.my/residential/pricing-tariffs')
 soup = bs(response.text, 'html.parser')
@@ -48,7 +49,7 @@ for kWh in tariffkWh:
 for kWh, cent in zip(kWhList, centList):
     tariffPrices.append({
         'kWh': kWh,
-        'cent': float(cent) / 100
+        'cent': float(Decimal(cent) / Decimal('100')) # hurmm very janky la but it works ig
     })
 
 tariffPrices = json.dumps(tariffPrices, indent=4)
