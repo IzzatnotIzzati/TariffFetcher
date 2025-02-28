@@ -3,6 +3,7 @@
 from bs4 import BeautifulSoup as bs
 import requests
 import json
+from functions import *
 
 response = requests.get('https://www.tnb.com.my/residential/pricing-tariffs')
 soup = bs(response.text, 'html.parser')
@@ -18,29 +19,38 @@ tariffPrices = []
 kWhList = []
 centList = []
 
-for kWh, cent in zip(tariffkWh, tariffCent):
-    kWh_text = kWh.get_text(strip=True)
+print("\nCollecting cent values:")
+for cent in tariffCent:
     cent_text = cent.get_text(strip=True)
-
-    if 'next' in kWh_text or 'first' in kWh_text: # alhamdulillah dapat fix
-        tariffPrices.append({
-            'kWh': kWh_text,
-            'cent': cent_text
+    print(f"Value: '{cent_text}'")
+    if containsNum(cent_text):
+        centList.append({
+            'value': cent_text
         })
 
-    if cent_text == '' or 'Domestic Tariff' in cent_text or 'sen/kWh' in cent_text:
+# Then collect kWh ranges
+print("\nCollecting kWh ranges:")
+for kWh in tariffkWh:
+    kWh_text = kWh.get_text(strip=True)
+    print(f"Value: '{kWh_text}'")
+    if 'next' in kWh_text or 'first' in kWh_text:
+        kWhList.append({
+            'range': kWh_text
+        })
+    else:
         continue
 
-def appendTariffPrices(kWh, cent):
-        tariffPrices.append({
-            'kWh': kWh,
-            'cent': cent
-        })
+
+tariffPrices.append({
+    'kWh': kWhList,
+    'cent': centList
+})
+
+
 
 tariffPrices = json.dumps(tariffPrices, indent=4)
 
 
 # debug :( saya pon pening baca, dw
-print(tariffPrices + '\n')
-print(tariffCent)
-print(tariffkWh)
+print(centList)
+print(kWhList)

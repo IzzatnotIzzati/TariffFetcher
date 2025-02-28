@@ -11,6 +11,11 @@ def tarriff():
     tariff = soup.find('td', class_='').text
     print(tariff)
     return float(tariff)
+
+def containsNum(inputString):
+    result = any(char.isdigit() or char == '.' for char in inputString)
+    print(f"Checking '{inputString}': {result}")  # Debug print
+    return result
     
 
 
