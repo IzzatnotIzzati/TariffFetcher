@@ -1,9 +1,10 @@
 # Utk trial and error masa testing scrape data dari website TNB
+# Use as reference utk buat function scraping kat functions.py (or maybe i should js do it here idk)
 
 from bs4 import BeautifulSoup as bs
 import requests
 import json
-from functions import *
+from functions import containsNum
 from decimal import Decimal
 
 response = requests.get('https://www.tnb.com.my/residential/pricing-tariffs')
