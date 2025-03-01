@@ -11,4 +11,4 @@
 [🚧] curses (py-cui) TUI\
 [🚧] Arbitrary precision instead of floating point (partially done so far)
 
-An ASK school project for ASK F3. Currently progress is being made on Experiments branch as of 27/2/2025 10:58AM UTC+8
+An ASK school project for ASK F3 (group Izzat & Samson). Currently progress is being made on Experiments branch as of 27/2/2025 10:58AM UTC+8
