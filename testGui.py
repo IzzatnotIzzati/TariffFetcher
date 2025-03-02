@@ -85,6 +85,13 @@ Click on Start or on the "Calculate" tab to start. Follow the on-screen instruct
 
 
 
+
+
+
+
+
+
+
 if __name__ == "__main__":
     app = TariffFetcher()
     app.run()

@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup as bs
 import requests
 import json
 from decimal import Decimal
-from functions import containsNum
+from numcheck import containsNum
 
 
 
