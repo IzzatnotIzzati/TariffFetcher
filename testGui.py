@@ -14,7 +14,10 @@ class TariffFetcher(App):
         yield Header()
         
         with TabbedContent():
-            with TabPane("Introduction"):
+            
+############################################################################################################################            
+            
+            with TabPane("Introduction", id="intro"):
                 
                 yield Label ("Click on any of these options below or select with Tab key to navigate.")
                 with Collapsible(title="Introduction"):
@@ -35,8 +38,9 @@ Click on Start or on the "Calculate" tab to start. Follow the on-screen instruct
                     yield Button("Start", id="start")
             
             
-            with TabPane("Main"):
+            with TabPane("Main", id="main"):
                 yield Markdown("JESSICA")
+            
             with TabPane("Paul"):
                 yield Markdown("PAUL")
         
@@ -76,7 +80,8 @@ Click on Start or on the "Calculate" tab to start. Follow the on-screen instruct
 
     @on(Button.Pressed, "#start")
     def start(self):
-        """Start the app."""
+        # Switch to Main tab
+        self.query_one(TabbedContent).active = "main"
 
 
 
