@@ -8,7 +8,7 @@
 
 [✅] Automatically fetches latest tariff (done)\
 [🚧] Calculates energy usage + ICPT + KWTBB (RE Fund) + Tax\
-[🚧] curses (py-cui) TUI\
+[🚧] TUI made with Textual (in-progress)\
 [🚧] Arbitrary precision instead of floating point (partially done so far)
 
 An ASK school project for ASK F3 (group Izzat & Samson). Latest progresses/testing in Experiments branch, all main branch for stable (not testing, duhh)

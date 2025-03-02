@@ -1,12 +1,4 @@
-from bs4 import BeautifulSoup as bs
-import requests
-import json
-from decimal import Decimal
-
-
-
-
-
+# contains basic functions
 
 def containsNum(inputString):
     result = any(char.isdigit() or char == '.' for char in inputString)
