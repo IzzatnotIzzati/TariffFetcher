@@ -1,28 +1,32 @@
 from bs4 import BeautifulSoup as bs
-import requests
+import aiohttp
 import json
 from decimal import Decimal
 from numcheck import containsNum
+import asyncio
 
 class TariffResult:
     def __init__(self):
         self.result = None
         self.err = None
 
-def tarriff(): # fetch and return latest tariff (hurm typo byk2 skrg dah pening gila nk betulkan)
+async def tarriff():  # fetch and return latest tariff
     tariff = TariffResult()
     
     try:
-        response = requests.get('https://www.tnb.com.my/residential/pricing-tariffs')
-        soup = bs(response.text, 'html.parser')
+        async with aiohttp.ClientSession() as session:
+            async with session.get('https://www.tnb.com.my/residential/pricing-tariffs') as response:
+                html = await response.text()
+                
+        soup = bs(html, 'html.parser')
 
-        # Dapatkan tarif dlm sen/kWh
+        # Get tariff in sen/kWh
         tariffCent = soup.find_all('td', class_='content', align='center', width='')
 
-        # Tareik amnt kWh
+        # Get kWh amounts
         tariffkWh = soup.find_all('td', class_='content', valign='top')
 
-        # Convert jd JSON list
+        # Convert to JSON list
         tariffPrices = []
         kWhList = []
         centList = []
@@ -49,5 +53,4 @@ def tarriff(): # fetch and return latest tariff (hurm typo byk2 skrg dah pening 
     except Exception as err:
         tariff.err = str(err)
         return tariff
-    
     

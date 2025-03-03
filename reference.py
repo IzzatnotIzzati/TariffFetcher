@@ -4,7 +4,7 @@
 from bs4 import BeautifulSoup as bs
 import requests
 import json
-from functions import containsNum
+from numcheck import containsNum
 from decimal import Decimal
 
 response = requests.get('https://www.tnb.com.my/residential/pricing-tariffs')
