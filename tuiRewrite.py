@@ -36,6 +36,8 @@ Click on Start or on the "Calculate" tab to start. Follow the on-screen instruct
                 """
             )
             yield Button("Start", id="start")
+    
+
 
 
 
@@ -57,6 +59,11 @@ class MainApp(App):
                 yield TariffFetcher()
         
         yield Footer()
+
+    @on(Button.Pressed, "#start")
+    def start(self):
+        # Switch to Main tab
+        self.query_one(TabbedContent).active = "calc"
 
 if __name__ == "__main__":
     app = MainApp()
