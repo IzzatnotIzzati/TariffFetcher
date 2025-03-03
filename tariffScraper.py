@@ -4,44 +4,50 @@ import json
 from decimal import Decimal
 from numcheck import containsNum
 
+class TariffResult:
+    def __init__(self):
+        self.result = None
+        self.err = None
 
+def tarriff(): # fetch and return latest tariff (hurm typo byk2 skrg dah pening gila nk betulkan)
+    tariff = TariffResult()
+    
+    try:
+        response = requests.get('https://www.tnb.com.my/residential/pricing-tariffs')
+        soup = bs(response.text, 'html.parser')
 
-# Cari tariff TNB
-def tarriff(tariff):
-    response = requests.get('https://www.tnb.com.my/residential/pricing-tariffs')
-    soup = bs(response.text, 'html.parser')
+        # Dapatkan tarif dlm sen/kWh
+        tariffCent = soup.find_all('td', class_='content', align='center', width='')
 
-    # Dapatkan tarif dlm sen/kWh
-    tariffCent = soup.find_all('td', class_='content', align='center', width='')
+        # Tareik amnt kWh
+        tariffkWh = soup.find_all('td', class_='content', valign='top')
 
-    # Tareik amnt kWh
-    tariffkWh = soup.find_all('td', class_='content', valign='top')
+        # Convert jd JSON list
+        tariffPrices = []
+        kWhList = []
+        centList = []
 
-    # Convert jd JSON list
-    tariffPrices = []
-    kWhList = []
-    centList = []
+        for cent in tariffCent:
+            cent_text = cent.get_text(strip=True)
+            if containsNum(cent_text):
+                centList.append(cent_text)
 
-    for cent in tariffCent:
-        cent_text = cent.get_text(strip=True)
-        if containsNum(cent_text):
-            centList.append(cent_text)  # Store as string, not set
+        for kWh in tariffkWh:
+            kWh_text = kWh.get_text(strip=True)
+            if 'next' in kWh_text or 'first' in kWh_text:
+                kWhList.append(kWh_text)
 
-    for kWh in tariffkWh:
-        kWh_text = kWh.get_text(strip=True)
-        if 'next' in kWh_text or 'first' in kWh_text:
-            kWhList.append(kWh_text)  # Store as string, not set
+        for kWh, cent in zip(kWhList, centList):
+            tariffPrices.append({
+                'kWh': kWh,
+                'cent': float(Decimal(cent) / Decimal('100'))
+            })
 
-    for kWh, cent in zip(kWhList, centList):
-        tariffPrices.append({
-            'kWh': kWh,
-            'cent': float(Decimal(cent) / Decimal('100')) # hurmm very janky la but it works ig
-    })
+        tariff.result = json.dumps(tariffPrices, indent=4)
+        return tariff
 
-    tariffPrices = json.dumps(tariffPrices, indent=4)
-
-    try :
-        return tariff.result
     except Exception as err:
-        return tariff.err
+        tariff.err = str(err)
+        return tariff
+    
     
