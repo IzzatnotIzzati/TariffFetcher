@@ -60,6 +60,14 @@ class MainApp(App):
         
         yield Footer()
 
+        self.theme = "gruvbox"
+
+    def action_toggle_dark(self) -> None:
+        """An action to toggle dark mode."""
+        self.theme = (
+            "gruvbox" if self.theme == "catppuccin-latte" else "catppuccin-latte"
+        )
+    
     @on(Button.Pressed, "#start")
     def start(self):
         # Switch to Main tab
