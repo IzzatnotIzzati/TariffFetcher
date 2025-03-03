@@ -7,7 +7,7 @@ from numcheck import containsNum
 
 
 # Cari tariff TNB
-def tarriff():
+def tarriff(tariff):
     response = requests.get('https://www.tnb.com.my/residential/pricing-tariffs')
     soup = bs(response.text, 'html.parser')
 
@@ -40,4 +40,8 @@ def tarriff():
 
     tariffPrices = json.dumps(tariffPrices, indent=4)
 
-    return tariffPrices
+    try :
+        return tariff.result
+    except Exception as err:
+        return tariff.err
+    
