@@ -1,6 +1,7 @@
 from numcheck import *
 from asyncScraper import tarriff
 import asyncio
+import json
 
 
 async def main():
@@ -9,7 +10,7 @@ async def main():
         print(f"Error: {result.err}")
     else:
         if hasattr(result, 'result') and result.result is not None:
-            print(result.result)
+            print(json.loads(result.result))
 
 if __name__ == "__main__":
     asyncio.run(main())

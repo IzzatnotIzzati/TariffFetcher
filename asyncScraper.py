@@ -54,3 +54,4 @@ async def tarriff():  # fetch and return latest tariff
         tariff.err = str(err)
         return tariff
     
+    

@@ -3,6 +3,9 @@ from textual.app import App, ComposeResult
 from textual.widgets import *
 from asyncScraper import tarriff
 from numcheck import containsNum
+import json
+
+tariffRates = None
 
 class TariffFetcher(Static):
     """A Textual app to calculate TNB bill based on current tariff rates."""
@@ -15,6 +18,28 @@ class TariffFetcher(Static):
 
 class Intro(Static):
     """Introduce user to app"""
+
+    async def on_mount(self) -> None:
+        tariffRates = await tarriff()
+        if hasattr(tariffRates, 'err') and tariffRates.err is not None:
+            self.notify(f"Unable to fetch latest tariff rates")
+            self.query_one("#tariff-display", Markdown).update("[ERROR] " + str(tariffRates.err))
+        else:
+            if hasattr(tariffRates, 'result') and tariffRates is not None:
+                rates = json.loads(tariffRates.result)
+                
+                # Tukar jd list markdown
+                markdown_content = "## Current TNB Tariff Rates\n\n"
+                for rate in rates:
+                    markdown_content += f"- **{rate['kWh']}**\n"
+                    markdown_content += f"  - Rate: RM {rate['cent']} per kWh\n"
+                
+                # update
+                self.query_one("#tariff-display", Markdown).update(markdown_content)
+                self.notify(f"Successfully fetched latest tariffs from TNB!")
+
+
+    
 
     def compose(self) -> ComposeResult:
         
@@ -38,17 +63,8 @@ Click on Start or on the "Calculate" tab to start. Follow the on-screen instruct
             yield Button("Start", id="start")
 
         with Collapsible(title="Current tariff rates"):
-            yield Markdown(id="tariffRatesStatic")
+            yield Markdown("Loading tariff rates...", id="tariff-display")
 
-    async def on_mount(self) -> None:
-        tariffRates = await tarriff()
-        if hasattr(tariffRates, 'err') and tariffRates.err is not None:
-            self.notify(f"Unable to fetch latest tariff rates")
-        else:
-            if hasattr(tariffRates, 'result') and tariffRates.result is not None:
-                self.query_one("#tariffRatesStatic", Markdown).update(tariffRates.result)
-                self.notify(f"Successfully fetched latest tariffs from TNB!")
-                
     
 
 
@@ -58,6 +74,11 @@ Click on Start or on the "Calculate" tab to start. Follow the on-screen instruct
 class MainApp(App):
     BINDINGS = [("d", "toggle_dark", "Toggle dark mode")] 
     
+    @on(Button.Pressed, "#start")
+    def start(self):
+        # Switch to Main tab
+        self.query_one(TabbedContent).active = "calc"
+        
     def compose(self) -> ComposeResult:
         yield Header()
         
@@ -80,11 +101,7 @@ class MainApp(App):
         self.theme = (
             "gruvbox" if self.theme == "catppuccin-latte" else "catppuccin-latte"
         )
-    
-    @on(Button.Pressed, "#start")
-    def start(self):
-        # Switch to Main tab
-        self.query_one(TabbedContent).active = "calc"
+
 
 if __name__ == "__main__":
     app = MainApp()
