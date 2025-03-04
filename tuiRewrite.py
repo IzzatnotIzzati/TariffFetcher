@@ -36,6 +36,19 @@ Click on Start or on the "Calculate" tab to start. Follow the on-screen instruct
                 """
             )
             yield Button("Start", id="start")
+
+        with Collapsible(title="Current tariff rates"):
+            yield Markdown(id="tariffRatesStatic")
+
+    async def on_mount(self) -> None:
+        tariffRates = await tarriff()
+        if hasattr(tariffRates, 'err') and tariffRates.err is not None:
+            self.notify(f"Unable to fetch latest tariff rates")
+        else:
+            if hasattr(tariffRates, 'result') and tariffRates.result is not None:
+                self.query_one("#tariffRatesStatic", Markdown).update(tariffRates.result)
+                self.notify(f"Successfully fetched latest tariffs from TNB!")
+                
     
 
 
