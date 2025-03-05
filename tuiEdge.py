@@ -13,7 +13,18 @@ class TariffFetcher(Static):
     CSS_PATH = "styles.tcss"
 
     def compose(self) -> ComposeResult:
-        yield Label("Placeholder, calculator will be here.")
+        yield Input(placeholder="Insert name", id="name")
+        yield Input(placeholder="Insert total electricity usage in kWh", id="totalUsage")
+        yield Input(placeholder="Insert ICPT rate in number for 600kWh and less (rebate)")
+        yield Input(placeholder="Insert ICPT rate in number for 1500kWh and above (surcharge)")
+        with Collapsible(title="Disclaimer*"):
+            yield Markdown("""
+This calculator is only used as a guide and does not include additional charges such as late payment fee, penalty, etc. Includes hardcoded 8% Service Tax (ST) if usage exceeds 600kWh which may not be accurate in all situations (eg: living in Pulau Langkawi, billing date less than 28 days, etc). This guide follows Tariff A (non-commercial use).
+""")
+                           
+
+
+
 
 
 class Intro(Static):
@@ -22,7 +33,7 @@ class Intro(Static):
     async def on_mount(self) -> None:
         tariffRates = await tarriff()
         if hasattr(tariffRates, 'err') and tariffRates.err is not None:
-            self.notify(f"Unable to fetch latest tariff rates")
+            self.notify(f"Unable to fetch latest tariff rates. This calculator requires an internet connection. Restart the program once connected to the internet.")
             self.query_one("#tariff-display", Markdown).update("[ERROR] " + str(tariffRates.err))
         else:
             if hasattr(tariffRates, 'result') and tariffRates is not None:
@@ -66,10 +77,6 @@ Click on Start or on the "Calculate" tab to start. Follow the on-screen instruct
             yield Markdown("Loading tariff rates...", id="tariff-display")
 
     
-
-
-
-
 
 class MainApp(App):
     BINDINGS = [("d", "toggle_dark", "Toggle dark mode")] 
