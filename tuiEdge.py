@@ -12,15 +12,58 @@ class TariffFetcher(Static):
     
     CSS_PATH = "styles.tcss"
 
+    name = ""
+    totalUsage = None
+    icptRebate = None
+    icptSurcharge = None
+    
     def compose(self) -> ComposeResult:
         yield Input(placeholder="Insert name", id="name")
         yield Input(placeholder="Insert total electricity usage in kWh", id="totalUsage")
-        yield Input(placeholder="Insert ICPT rate in number for 600kWh and less (rebate)")
-        yield Input(placeholder="Insert ICPT rate in number for 1500kWh and above (surcharge)")
+        yield Input(placeholder="Insert ICPT rate in number for 600kWh and less (rebate)", id="icptRebate")
+        yield Input(placeholder="Insert ICPT rate in number for 1500kWh and above (surcharge)", id="icptSurcharge")
+        yield Button("Output everything (barf)", id="barf") # button muntah baliks semua value
         with Collapsible(title="Disclaimer*"):
             yield Markdown("""
-This calculator is only used as a guide and does not include additional charges such as late payment fee, penalty, etc. Includes hardcoded 8% Service Tax (ST) if usage exceeds 600kWh which may not be accurate in all situations (eg: living in Pulau Langkawi, billing date less than 28 days, etc). This guide follows Tariff A (non-commercial use).
+This calculator is only used as a guide and does not include additional charges such as late payment fee, penalty, etc. Includes hardcoded 8% Service Tax (ST) if usage exceeds 600kWh which may not be accurate in all situations (eg: living in Pulau Langkawi, billing date less than 28 days, etc). This guide follows Tariff A (non-commercial use). Does not include subsidies.
 """)
+    
+        
+    @on(Input.Submitted, "#name")
+    def setName(self):
+        name = self.query_one("#name") # finally working :D
+        self.name = str(name.value)
+        self.notify(self.name)
+
+    @on(Input.Submitted, "#totalUsage")
+    def setUsage(self):
+        totalUsage = self.query_one("#totalUsage")
+        self.totalUsage = float(totalUsage.value)
+        self.notify(str(self.totalUsage))
+
+    @on(Input.Submitted, "#icptRebate")
+    def setRebate(self):
+        icptRebate = self.query_one("#icptRebate")
+        self.icptRebate = float(icptRebate.value)
+        self.notify(str(self.icptRebate))
+
+    @on(Input.Submitted, "#icptSurcharge")
+    def setSurcharge(self):
+        icptSurcharge = self.query_one("#totalUsage")
+        self.icptSurcharge = float(icptSurcharge.value)
+        self.notify(str(self.icptSurcharge))
+
+    @on(Button.Pressed, "#barf")
+    def barf(self):
+        self.mount(Markdown(f"""
+Name: {self.name}
+Usage (kWh): {self.totalUsage}
+Rebate: {self.icptRebate}
+Surcharge: {self.icptSurcharge}
+        """))
+
+    
+
                            
 
 
@@ -28,6 +71,7 @@ This calculator is only used as a guide and does not include additional charges 
 
 
 class Intro(Static):
+
     """Introduce user to app"""
 
     async def on_mount(self) -> None:
