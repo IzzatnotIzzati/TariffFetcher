@@ -25,11 +25,13 @@ elif totalUsage <= 900:
 else:
     bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + 300 * centRate[3] + (totalUsage - 900) * centRate[4])
     taxedAmount = Decimal(300 * centRate[3] + (totalUsage - 900) * centRate[4])
-totalBill = bill # heard it's standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
+#totalBill = bill # heard it's standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
 
-taxedAmount = (taxedAmount * Decimal(1.08)) - taxedAmount
-
-totalBill = bill + taxedAmount
+if totalUsage > 600:
+    taxedAmount = (taxedAmount * Decimal(1.08)) - taxedAmount
+    totalBill = bill + taxedAmount
+else:
+    totalBill = bill
 
 print("Before taxes (rounded): RM", bill.quantize(Decimal('0.01'), rounding=ROUND_HALF_EVEN))
 print("Unrounded: RM", bill)
