@@ -27,9 +27,9 @@ else:
     taxedAmount = Decimal(300 * centRate[3] + (totalUsage - 900) * centRate[4])
 totalBill = bill # heard it's standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
 
-taxedAmount = Decimal(taxedAmount)
+taxedAmount = (taxedAmount * Decimal(1.08)) - taxedAmount
 
-totalBill = bill
+totalBill = bill + taxedAmount
 
 print("Before taxes (rounded): RM", bill.quantize(Decimal('0.01'), rounding=ROUND_HALF_EVEN))
 print("Unrounded: RM", bill)
