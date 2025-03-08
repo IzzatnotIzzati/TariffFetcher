@@ -5,6 +5,8 @@ tariffRates = [{'kWh': 'For the first 200 kWh (1 - 200 kWh) per month', 'cent': 
 centRate = [item['cent'] for item in tariffRates]
 
 totalUsage = int(input("usage: "))
+totalBill = None
+taxedAmount = None
 
 # 1-200kWh
 if totalUsage <= 200:
@@ -18,13 +20,22 @@ elif totalUsage <= 600:
 # 601-900kWh
 elif totalUsage <= 900:
     bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + (totalUsage - 600) * centRate[3])
+    taxedAmount = Decimal((totalUsage - 600) * centRate[3])
 # >900 kWh
 else:
-    bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + 300 * 0.566 + (totalUsage - 900) * centRate[4])
+    bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + 300 * centRate[3] + (totalUsage - 900) * centRate[4])
+    taxedAmount = Decimal(300 * centRate[3] + (totalUsage - 900) * centRate[4])
+totalBill = bill # heard it's standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
 
-bill = bill # heard it's standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
-print(bill.quantize(Decimal('0.01'), rounding=ROUND_HALF_EVEN))
+taxedAmount = Decimal(taxedAmount)
+
+totalBill = bill
+
+print("Before taxes (rounded): RM", bill.quantize(Decimal('0.01'), rounding=ROUND_HALF_EVEN))
 print("Unrounded: RM", bill)
+print("After taxes (rounded): RM", totalBill.quantize(Decimal('0.01'), rounding=ROUND_HALF_EVEN))
+print("Unrounded: RM", totalBill)
+print("Taxed amnt: RM", taxedAmount)
 
 
 

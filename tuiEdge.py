@@ -71,19 +71,15 @@ This calculator is only used as a guide and does not include additional charges 
         global icptSurcharge
         global tariffRates
         
-        billAmount = str(self.calculate())
+        billAmount = self.calculate()
         self.mount(Markdown(f"""
-Name: {name}
-Usage: {totalUsage}kWh
-Rebate: {icptRebate}
-Surcharge: {icptSurcharge}
-Rates: {tariffRates}
+Rates (DEBUG, REMOVE ON RELEASE): {tariffRates}
 
 Bill Details for {name}
 - Total Usage: {totalUsage} kWh
 - ICPT Rebate Rate (cent): {icptRebate if icptRebate else 'N/A'}
 - ICPT Surcharge Rate (cent): {icptSurcharge if icptSurcharge else 'N/A'}
-- Final Bill Amount: RM {billAmount}
+- Final Bill Amount: RM {billAmount:.2f}
         """))
 
 
@@ -116,11 +112,11 @@ Bill Details for {name}
             bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + (totalUsage - 600) * centRate[3])
         # >900 kWh
         else:
-            bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + 300 * 0.566 + (totalUsage - 900) * centRate[4])
+            bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + 300 * centRate[3] + (totalUsage - 900) * centRate[4])
 
-        bill = bill.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) # heard it's standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
+        bill = bill.quantize(Decimal('0.01'), rounding=ROUND_HALF_EVEN) # heard it's standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
 #        self.notify(str(bill))
-        return float(bill)
+        return Decimal(bill) # looks like no problem tanpa float()
 
 
 
