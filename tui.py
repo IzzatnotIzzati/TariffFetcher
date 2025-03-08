@@ -4,24 +4,30 @@ from textual.widgets import *
 from asyncScraper import tarriff
 from numcheck import containsNum
 import json
+from decimal import Decimal, ROUND_HALF_EVEN, ROUND_HALF_UP
 
 tariffRates = None
+name = ""
+totalUsage = None
+icptRebate = None
+icptSurcharge = None
 
 class TariffFetcher(Static):
     """A Textual app to calculate TNB bill based on current tariff rates."""
     
     CSS_PATH = "styles.tcss"
 
-    name = ""
-    totalUsage = None
-    icptRebate = None
-    icptSurcharge = None
+    global name
+    global totalUsage
+    global icptRebate
+    global icptSurcharge
+    global tariffRates
     
     def compose(self) -> ComposeResult:
         yield Input(placeholder="Insert name", id="name")
         yield Input(placeholder="Insert total electricity usage in kWh", id="totalUsage")
-        yield Input(placeholder="Insert ICPT rate in number for 600kWh and less (rebate)", id="icptRebate")
-        yield Input(placeholder="Insert ICPT rate in number for 1500kWh and above (surcharge)", id="icptSurcharge")
+        yield Input(placeholder="Insert ICPT rate in number for 600kWh and less (rebate, cent)", id="icptRebate")
+        yield Input(placeholder="Insert ICPT rate in number for 1500kWh and above (surcharge, cent)", id="icptSurcharge")
         yield Button("Output everything (barf)", id="barf") # button muntah balik semua value yg bru masuk
         with Collapsible(title="Disclaimer*"):
             yield Markdown("""
@@ -31,42 +37,93 @@ This calculator is only used as a guide and does not include additional charges 
         
     @on(Input.Submitted, "#name")
     def setName(self):
+        global name
         name = self.query_one("#name") # finally working :D
-        self.name = str(name.value)
-        self.notify(self.name)
+        name = str(name.value)
+        self.notify(name)
 
     @on(Input.Submitted, "#totalUsage")
     def setUsage(self):
+        global totalUsage
         totalUsage = self.query_one("#totalUsage")
-        self.totalUsage = float(totalUsage.value)
-        self.notify(str(self.totalUsage))
+        totalUsage = Decimal(totalUsage.value)
+        self.notify(str(totalUsage))
 
     @on(Input.Submitted, "#icptRebate")
     def setRebate(self):
+        global icptRebate
         icptRebate = self.query_one("#icptRebate")
-        self.icptRebate = float(icptRebate.value)
-        self.notify(str(self.icptRebate))
+        icptRebate = Decimal(icptRebate.value)
+        self.notify(str(icptRebate))
 
     @on(Input.Submitted, "#icptSurcharge")
     def setSurcharge(self):
-        icptSurcharge = self.query_one("#totalUsage")
-        self.icptSurcharge = float(icptSurcharge.value)
-        self.notify(str(self.icptSurcharge))
+        global icptSurcharge
+        icptSurcharge = self.query_one("#icptSurcharge")
+        icptSurcharge = Decimal(icptSurcharge.value)
+        self.notify(str(icptSurcharge))
 
     @on(Button.Pressed, "#barf")
     def barf(self):
+        global name
+        global totalUsage
+        global icptRebate
+        global icptSurcharge
+        global tariffRates
+        
+        billAmount = str(self.calculate())
         self.mount(Markdown(f"""
-Name: {self.name}
-Usage (kWh): {self.totalUsage}
-Rebate: {self.icptRebate}
-Surcharge: {self.icptSurcharge}
+Name: {name}
+Usage: {totalUsage}kWh
+Rebate: {icptRebate}
+Surcharge: {icptSurcharge}
+Rates: {tariffRates}
+
+Bill Details for {name}
+- Total Usage: {totalUsage} kWh
+- ICPT Rebate Rate (cent): {icptRebate if icptRebate else 'N/A'}
+- ICPT Surcharge Rate (cent): {icptSurcharge if icptSurcharge else 'N/A'}
+- Final Bill Amount: RM {billAmount}
         """))
 
-    def calculate(self):
-        print("placeholder for calculator")
 
 
-    
+    def calculate(self) -> float:
+        """kira bil guna rates progresif sama dgn kira cukai kat amerika syarikat"""
+        global name
+        global totalUsage
+        global icptRebate
+        global icptSurcharge
+        global tariffRates
+        # DO NOT WASTE YOUR TIME DEBUGGING THIS HERE, PLS GO TO calcReference.py TO DEBUG
+        if totalUsage == None:
+            self.notify("Missing usage data")
+            return 0.0
+
+        centRate = [Decimal(str(item['cent'])) for item in tariffRates] # YAYYY ITS WORKING, also this is for making list and hace the cent values in decimal so that it works with the calculator below
+
+        # 1-200kWh
+        if totalUsage <= 200:
+            bill = Decimal(totalUsage * centRate[0])
+        # 201-300kWh
+        elif totalUsage <= 300:
+            bill = Decimal(200 * centRate[0] + (totalUsage - 200) * centRate[1])
+        # 301-600 kWh
+        elif totalUsage <= 600:
+            bill = Decimal(200 * centRate[0] + 100 * centRate[1] + (totalUsage - 300) * centRate[2])
+        # 601-900kWh
+        elif totalUsage <= 900:
+            bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + (totalUsage - 600) * centRate[3])
+        # >900 kWh
+        else:
+            bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + 300 * 0.566 + (totalUsage - 900) * centRate[4])
+
+        bill = bill.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) # heard it's standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
+#        self.notify(str(bill))
+        return float(bill)
+
+
+
 
                            
 
@@ -79,6 +136,8 @@ class Intro(Static):
     """Introduce user to app"""
 
     async def on_mount(self) -> None:
+        global tariffRates
+        
         tariffRates = await tarriff()
         if hasattr(tariffRates, 'err') and tariffRates.err is not None:
             self.notify(f"Unable to fetch latest tariff rates. This calculator requires an internet connection. Restart the program once connected to the internet.")
@@ -86,11 +145,11 @@ class Intro(Static):
         else:
             if hasattr(tariffRates, 'result') and tariffRates is not None:
                 rates = json.loads(tariffRates.result)
-                self.tariffRates = rates
+                tariffRates = rates
                 
                 # Tukar jd list markdown
                 markdown_content = "## Current TNB Tariff Rates\n\n"
-                for rate in self.tariffRates:
+                for rate in tariffRates:
                     markdown_content += f"- **{rate['kWh']}**\n"
                     markdown_content += f"  - Rate: RM {rate['cent']} per kWh\n"
                 
@@ -162,3 +221,4 @@ class MainApp(App):
 if __name__ == "__main__":
     app = MainApp()
     app.run()
+
