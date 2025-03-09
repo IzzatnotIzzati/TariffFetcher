@@ -17,5 +17,4 @@ An ASK school project for ASK F3 (group Izzat & Samson). Latest progresses/testi
 [Click here](https://github.com/IzzatnotIzzati/TariffFetcher/blob/main/guide.md)
 
 ## Flowchart
-![Alt text](./calculations.drawio.svg)
-<img src="./calculations.drawio.svg">
+![A flowchart](./calculations.drawio.svg)
