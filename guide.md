@@ -7,4 +7,5 @@
 [Click here](https://folge.me/g/shared/WMaKbe8Q4Ym6n15/install-tarifffetcher-s-libraries)
 
 ## 3. Use TariffFetcher
+[Click here](https://folge.me/g/shared/brMlYmpMa7O5Z4v/use-tarifffetcher)
 
