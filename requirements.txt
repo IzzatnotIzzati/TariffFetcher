@@ -1,8 +1,5 @@
 beautifulsoup4==4.12.2
 requests==2.31.0
-pandas==2.1.1
-lxml==4.9.3
-python-dotenv==1.0.0
 windows-curses==2.4.1
 textual==2.1.2
 textual-dev==1.7.0
