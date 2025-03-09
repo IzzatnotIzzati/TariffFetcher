@@ -12,3 +12,6 @@
 [✅] Arbitrary precision instead of floating point (in fact, probably too accurate since TNB seems to round up after every step)
 
 An ASK school project for ASK F3 (group Izzat & Samson). Latest progresses/testing in Experiments branch, main branch for stable. Main branch receives PR from Experiments branch at points where I feel it's stable and not broken.
+
+## Howto:
+[Click here](https://github.com/IzzatnotIzzati/TariffFetcher/blob/main/guide.md)
