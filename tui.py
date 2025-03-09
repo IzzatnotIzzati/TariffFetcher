@@ -1,5 +1,5 @@
 '''
-This calculator is too accurate and is not in line with TNB bill. Gets worse the higher the consumption. Implement rounding after each step with quantize.
+This calculator is too accurate and is not in line with TNB bill. Gets worse the higher the consumption.
 '''
 
 
@@ -30,15 +30,22 @@ class TariffFetcher(Static):
     global tariffRates
     
     def compose(self) -> ComposeResult:
-        yield Input(placeholder="Insert name", id="name")
-        yield Input(placeholder="Insert total electricity usage in kWh", id="totalUsage")
-        yield Input(placeholder="Insert ICPT rate in number for 600kWh and less (rebate, cent)", id="icptRebate")
-        yield Input(placeholder="Insert ICPT rate in number for 1500kWh and above (surcharge, cent)", id="icptSurcharge")
-        yield Button("Output everything (barf)", id="barf") # button muntah balik semua value yg bru masuk
+        yield Input(placeholder="Insert name", type="text", id="name")
+        yield Input(placeholder="Insert total electricity usage in kWh", type="integer", id="totalUsage")
+        yield Input(placeholder="Insert ICPT rate in number for 600kWh and less (rebate, cent)", type="number", id="icptRebate")
+        yield Input(placeholder="Insert ICPT rate in number for 1500kWh and above (surcharge, cent)", type="number", id="icptSurcharge")
+        yield Button("Save & Calculate", id="barf") # button muntah balik semua value yg bru masuk
+        yield Markdown('''
+# Bill
+
+Looks like you haven't started the calculation yet. Fill in the form above and click on "Save & Calculate" to begin.
+                               
+                       ''', id="calcResult")
+        
         with Collapsible(title="Disclaimer*"):
             yield Markdown("""
 This calculator is only used as a guide and does not include additional charges such as late payment fee, penalty, etc. Includes hardcoded 8% Service Tax (ST) if usage exceeds 600kWh which may not be accurate in all situations (eg: living in Pulau Langkawi, billing date less than 28 days, etc). This guide follows Tariff A (non-commercial use). Does not include subsidies.
-""")
+""", id="calcResult")
     
         
     @on(Input.Submitted, "#name")
@@ -46,28 +53,24 @@ This calculator is only used as a guide and does not include additional charges 
         global name
         name = self.query_one("#name") # finally working :D
         name = str(name.value)
-        self.notify(name)
 
     @on(Input.Submitted, "#totalUsage")
     def setUsage(self):
         global totalUsage
         totalUsage = self.query_one("#totalUsage")
         totalUsage = Decimal(totalUsage.value)
-        self.notify(str(totalUsage))
 
     @on(Input.Submitted, "#icptRebate")
     def setRebate(self):
         global icptRebate
         icptRebate = self.query_one("#icptRebate")
         icptRebate = Decimal(icptRebate.value)
-        self.notify(str(icptRebate))
 
     @on(Input.Submitted, "#icptSurcharge")
     def setSurcharge(self):
         global icptSurcharge
         icptSurcharge = self.query_one("#icptSurcharge")
         icptSurcharge = Decimal(icptSurcharge.value)
-        self.notify(str(icptSurcharge))
 
     @on(Button.Pressed, "#barf")
     def barf(self):
@@ -76,17 +79,25 @@ This calculator is only used as a guide and does not include additional charges 
         global icptRebate
         global icptSurcharge
         global tariffRates
+        self.setName()
+        self.setUsage()
+        self.setRebate()
+        self.setSurcharge()
+        self.calculate()
         
         billAmount = self.calculate()
-        self.mount(Markdown(f"""
-Rates (DEBUG, REMOVE ON RELEASE): {tariffRates}
+#        self.mount(Markdown(f"""
+        self.query_one("#calcResult", Markdown).update(f"""
 
-Bill Details for {name}
+# Bill
+Name: {name if name else 'N/A'}
 - Total Usage: {totalUsage} kWh
-- ICPT Rebate Rate (cent): {icptRebate if icptRebate else 'N/A'}
-- ICPT Surcharge Rate (cent): {icptSurcharge if icptSurcharge else 'N/A'}
+- ICPT Rebate Rate: {icptRebate if icptRebate else 'N/A'} cent
+- ICPT Surcharge Rate: {icptSurcharge if icptSurcharge else 'N/A'} cent
+- RE Fund: {'1.6%' if totalUsage > 300 else 'N/A'}
+- SST: {'8%' if totalUsage > 600 else 'N/A'}
 - Final Bill Amount: RM {billAmount:.2f}
-        """))
+""")
 
 
 
@@ -125,34 +136,56 @@ Bill Details for {name}
 
         # Kira ICPT adjustment (rebate, surcharge)
         if totalUsage < 600:
-            rebate = Decimal(Decimal(icptRebate / 100) * (Decimal(totalUsage))) # 2 sen for every kwh
+            rebate = (Decimal(totalUsage * (Decimal(icptRebate) / Decimal(100)) )) # 2 sen for every kwh
             bill = bill - Decimal(rebate)
+            print("Rebate amount: ", rebate)
+            print("Final amount: ", bill)
         elif totalUsage > 600 and totalUsage <= 1500:
             bill = bill # no charge/rebate
         elif totalUsage > 1500:
-            surcharge = Decimal(totalUsage * Decimal(icptSurcharge))
+            surcharge = (Decimal(totalUsage * (Decimal(icptSurcharge) / Decimal(100))))
             bill = bill + Decimal(surcharge)
 
         # Kira KWTBB (RE Fund)
         if totalUsage > 300:
-            reFundCharge = Decimal(bill * Decimal(1.016)) # 1.6%
+            reFundCharge = Decimal(bill * Decimal(0.016)) # 1.6%
             bill = bill + reFundCharge
 
 
 
         if totalUsage > 600: # kira cukai klu lebih 600kwh
-            taxedAmount = (taxedAmount * Decimal(1.08)) - taxedAmount
+            taxedAmount = taxedAmount * Decimal('0.08')  # Calculate 8% tax directly
+
             totalBill = bill + taxedAmount
+
         else:
             totalBill = bill
 
         if totalBill < Decimal(3): #make sure dapat minimum charge
             totalBill = Decimal(3)
 
-        bill = totalBill # heard Decimal is standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
+        bill = totalBill.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) # heard Decimal is standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
+
+#        self.query_one(Markdown, "#calcResult").update(f'''
+# Bill
+#
+#Bill Details for {name if name else 'N/A'}
+#- Total Usage: {totalUsage} kWh
+#- ICPT Rebate Rate (cent): {icptRebate if icptRebate else 'N/A'}
+#- ICPT Surcharge Rate (cent): {icptSurcharge if icptSurcharge else 'N/A'}
+#- RE Fund: {'1.6%' if totalUsage > 300 else 'N/A'}
+#- SST: {'8%' if totalUsage > 600 else 'N/A'}
+#- Final Bill Amount: RM {bill:.2f}                                             
+#
+#''')
+
+
 
 
         return(totalBill.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
+        
+    
+
 
 
 
