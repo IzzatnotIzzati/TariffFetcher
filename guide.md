@@ -4,7 +4,7 @@
 [Click here](https://folge.me/g/shared/LnYqNeAX35JojX3/install-python)
 
 ## 2. Install TariffFetcher and its libraries
-[Click here](https://folge.me/g/shared/WMaKbe8Q4Ym6n15/install-tarifffetcher-s-libraries)
+[Click here](https://folge.me/g/shared/WMaKbe8Q4Ym6n15/install-tarifffetcher-s-libraries) (make sure to use the latest available version of TariffFetcher, too lazy to update the guide)
 
 ## 3. Use TariffFetcher
 [Click here](https://folge.me/g/shared/brMlYmpMa7O5Z4v/use-tarifffetcher)
