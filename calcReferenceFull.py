@@ -46,8 +46,10 @@ if totalUsage > 300:
 
 
 if totalUsage > 600: # kira cukai klu lebih 600kwh
-    taxedAmount = (taxedAmount * Decimal(1.08)) - taxedAmount
+    taxedAmount = taxedAmount * Decimal('0.08')  # Calculate 8% tax directly
+
     totalBill = bill + taxedAmount
+
 else:
     totalBill = bill
 

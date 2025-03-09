@@ -125,24 +125,28 @@ Bill Details for {name}
 
         # Kira ICPT adjustment (rebate, surcharge)
         if totalUsage < 600:
-            rebate = Decimal(Decimal(icptRebate / 100) * (Decimal(totalUsage))) # 2 sen for every kwh
+            rebate = (Decimal(totalUsage * (Decimal(icptRebate) / Decimal(100)) )) # 2 sen for every kwh
             bill = bill - Decimal(rebate)
+            print("Rebate amount: ", rebate)
+            print("Final amount: ", bill)
         elif totalUsage > 600 and totalUsage <= 1500:
             bill = bill # no charge/rebate
         elif totalUsage > 1500:
-            surcharge = Decimal(totalUsage * Decimal(icptSurcharge))
+            surcharge = (Decimal(totalUsage * (Decimal(icptSurcharge) / Decimal(100))))
             bill = bill + Decimal(surcharge)
 
         # Kira KWTBB (RE Fund)
         if totalUsage > 300:
-            reFundCharge = Decimal(bill * Decimal(1.016)) # 1.6%
+            reFundCharge = Decimal(bill * Decimal(0.016)) # 1.6%
             bill = bill + reFundCharge
 
 
 
         if totalUsage > 600: # kira cukai klu lebih 600kwh
-            taxedAmount = (taxedAmount * Decimal(1.08)) - taxedAmount
+            taxedAmount = taxedAmount * Decimal('0.08')  # Calculate 8% tax directly
+
             totalBill = bill + taxedAmount
+
         else:
             totalBill = bill
 
