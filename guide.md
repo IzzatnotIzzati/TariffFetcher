@@ -11,6 +11,6 @@
 
 # Other OSes (macOS, Linux)
 
-Mac: idk i dont own a mac anymore, and thats a powerpc one anyways \n
+Mac: idk i dont own a mac anymore, and thats a powerpc one anyways n\
 Linux: Install Python from your distro's package manager and follow pretty much the same steps. No spoonfeeding here.
 
