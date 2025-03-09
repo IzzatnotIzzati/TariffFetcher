@@ -1,6 +1,6 @@
 # TariffFetcher
 
-[🚧🏗️] Fetches latest tariff rates by Tenaga Nasional Berhad (TNB), helps calculate monthly bill based on kWh usage incl. tax. **Not affiliated with TNB**.
+Fetches latest tariff rates by Tenaga Nasional Berhad (TNB), helps calculate monthly bill based on kWh usage incl. tax. **Not affiliated with TNB**.
 
 ---
 
