@@ -135,7 +135,7 @@ Name: {name if name else 'N/A'}
             taxedAmount = Decimal(300 * centRate[3] + (totalUsage - 900) * centRate[4])
 
         # Kira ICPT adjustment (rebate, surcharge)
-        if totalUsage < 600:
+        if totalUsage <= 600:
             rebate = (Decimal(totalUsage * (Decimal(icptRebate) / Decimal(100)) )) # 2 sen for every kwh
             bill = bill - Decimal(rebate)
             print("Rebate amount: ", rebate)
