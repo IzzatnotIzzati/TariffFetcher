@@ -1,3 +1,9 @@
+'''
+This calculator is too accurate and is not in line with TNB bill. Gets worse the higher the consumption. Implement rounding after each step with quantize.
+'''
+
+
+
 from textual import on, work
 from textual.app import App, ComposeResult
 from textual.widgets import *
@@ -71,19 +77,15 @@ This calculator is only used as a guide and does not include additional charges 
         global icptSurcharge
         global tariffRates
         
-        billAmount = str(self.calculate())
+        billAmount = self.calculate()
         self.mount(Markdown(f"""
-Name: {name}
-Usage: {totalUsage}kWh
-Rebate: {icptRebate}
-Surcharge: {icptSurcharge}
-Rates: {tariffRates}
+Rates (DEBUG, REMOVE ON RELEASE): {tariffRates}
 
 Bill Details for {name}
 - Total Usage: {totalUsage} kWh
 - ICPT Rebate Rate (cent): {icptRebate if icptRebate else 'N/A'}
 - ICPT Surcharge Rate (cent): {icptSurcharge if icptSurcharge else 'N/A'}
-- Final Bill Amount: RM {billAmount}
+- Final Bill Amount: RM {billAmount:.2f}
         """))
 
 
@@ -95,6 +97,7 @@ Bill Details for {name}
         global icptRebate
         global icptSurcharge
         global tariffRates
+        taxedAmount = Decimal('0')
         # DO NOT WASTE YOUR TIME DEBUGGING THIS HERE, PLS GO TO calcReference.py TO DEBUG
         if totalUsage == None:
             self.notify("Missing usage data")
@@ -114,13 +117,42 @@ Bill Details for {name}
         # 601-900kWh
         elif totalUsage <= 900:
             bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + (totalUsage - 600) * centRate[3])
+            taxedAmount = Decimal((totalUsage - 600) * centRate[3])
         # >900 kWh
         else:
-            bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + 300 * 0.566 + (totalUsage - 900) * centRate[4])
+            bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + 300 * centRate[3] + (totalUsage - 900) * centRate[4])
+            taxedAmount = Decimal(300 * centRate[3] + (totalUsage - 900) * centRate[4])
 
-        bill = bill.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) # heard it's standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
-#        self.notify(str(bill))
-        return float(bill)
+        # Kira ICPT adjustment (rebate, surcharge)
+        if totalUsage < 600:
+            rebate = Decimal(Decimal(icptRebate / 100) * (Decimal(totalUsage))) # 2 sen for every kwh
+            bill = bill - Decimal(rebate)
+        elif totalUsage > 600 and totalUsage <= 1500:
+            bill = bill # no charge/rebate
+        elif totalUsage > 1500:
+            surcharge = Decimal(totalUsage * Decimal(icptSurcharge))
+            bill = bill + Decimal(surcharge)
+
+        # Kira KWTBB (RE Fund)
+        if totalUsage > 300:
+            reFundCharge = Decimal(bill * Decimal(0.016)) # 1.6%
+            bill = bill + reFundCharge
+
+
+
+        if totalUsage > 600: # kira cukai klu lebih 600kwh
+            taxedAmount = (taxedAmount * Decimal(1.08)) - taxedAmount
+            totalBill = bill + taxedAmount
+        else:
+            totalBill = bill
+
+        if totalBill < Decimal(3): #make sure dapat minimum charge
+            totalBill = Decimal(3)
+
+        bill = totalBill # heard Decimal is standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
+
+
+        return(totalBill.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
 
 
 

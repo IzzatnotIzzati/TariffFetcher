@@ -2,7 +2,7 @@
 
 from decimal import Decimal, ROUND_HALF_UP, ROUND_HALF_EVEN
 tariffRates = [{'kWh': 'For the first 200 kWh (1 - 200 kWh) per month', 'cent': 0.218}, {'kWh': 'For the next 100 kWh (201 - 300 kWh) per month', 'cent': 0.334}, {'kWh': 'For the next 300 kWh (301 - 600 kWh) per month', 'cent': 0.516}, {'kWh': 'For the next 300 kWh (601 - 900 kWh) per month', 'cent': 0.546}, {'kWh': 'For the next kWh (901 kWh onwards) per month', 'cent': 0.571}]
-centRate = [item['cent'] for item in tariffRates]
+centRate = [Decimal(str(item['cent'])) for item in tariffRates]
 
 totalUsage = int(input("usage: "))
 totalBill = None
@@ -26,6 +26,7 @@ else:
     bill = Decimal(200 * centRate[0] + 100 * centRate[1] + 300 * centRate[2] + 300 * centRate[3] + (totalUsage - 900) * centRate[4])
     taxedAmount = Decimal(300 * centRate[3] + (totalUsage - 900) * centRate[4])
 
+# Kira ICPT adjustment (rebate, surcharge)
 if totalUsage < 600:
     rebate = (Decimal(totalUsage * Decimal(0.02))) # 2 sen for every kwh
     bill = bill - Decimal(rebate)
@@ -35,7 +36,13 @@ elif totalUsage > 600 and totalUsage <= 1500:
     bill = bill # no charge/rebate
 elif totalUsage > 1500:
     surcharge = (Decimal(totalUsage * Decimal(0.10)))
-    bill = bill - Decimal(surcharge)
+    bill = bill + Decimal(surcharge)
+
+# Kira KWTBB (RE Fund)
+if totalUsage > 300:
+    reFundCharge = Decimal(bill * Decimal(0.016)) # 1.6%
+    bill = bill + reFundCharge
+
 
 
 if totalUsage > 600: # kira cukai klu lebih 600kwh
@@ -44,7 +51,10 @@ if totalUsage > 600: # kira cukai klu lebih 600kwh
 else:
     totalBill = bill
 
-bill = totalBill # heard it's standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
+if totalBill < Decimal(3): #make sure dapat minimum charge
+    totalBill = Decimal(3)
+
+bill = totalBill # heard Decimal is standards compliant, idk but anyways i like precision :) dont floating point differes between amd and intel anyways, im coding on an amd laptop but cg is gonna test on intel laptop
 
 
 print(totalBill.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
