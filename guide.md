@@ -1,8 +1,8 @@
 # Guide on how to install and use TariffFetcher (Windows)
 
 ## System requirements:
-Python 3.13.2
-OS: Agnostic. Windows, OSX, Linux, BSD, Oracle Solaris (just because you can doesn't mean you should, but for this you may need to compile it yourself), AIX, whatever as long as it has a port of Python 3.13.2.
+Python 3.13.2\
+OS: Agnostic. Windows, OSX, Linux, BSD, Oracle Solaris (just because you can doesn't mean you should, but for this you may need to compile it yourself), AIX, whatever as long as it has a port of Python 3.13.2.\
 Hardware: if you can run the OS above (non-exhaustive list), you probably can run TariffFetcher.
 
 ## 1. Install Python
